@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+                        http://www.springframework.org/schema/beans/spring-beans-3.1.xsd  
+                        http://www.springframework.org/schema/context  
+                        http://www.springframework.org/schema/context/spring-context-3.1.xsd  
+                        http://www.springframework.org/schema/mvc  
+                        http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd">
+    <!-- 加载属性文件 -->   
+    <context:property-placeholder location="classpath:jdbc.properties"/> 
+    
+    <!-- 数据源 -->            
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+    	<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+    </bean>
+    
+    <!-- 整合mybatis -->  
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    	<property name="dataSource" ref="dataSource" />
+    	<!-- 自动扫描mapping.xml文件 -->
+    	<property name="mapperLocations" value="classpath:online/qsx/mapper/*.xml"/>
+    	<!-- 配置插件 -->
+   		<property name="plugins">
+   			<array>
+   				<!-- 分页插件 -->
+   				<bean class="com.github.pagehelper.PageInterceptor">
+   					<property name="properties">
+   						<value>
+   							<!-- 设置数据库类型 -->
+   							helperDialect=mysql
+   							<!-- 避免翻页问题 -->
+			            	reasonable=true
+   						</value>
+   					</property>
+   				</bean>
+   			</array>
+   		</property>
+   		<!-- 别名 -->
+   		<property name="typeAliasesPackage" value="online.qsx.model" />
+    </bean>
+    
+    <!-- 识别接口 -->
+    <!-- DAO接口所在包名，spring会自动查找其下的类 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    	<property name="basePackage" value="online.qsx.mapper"/>
+    	<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+    </bean>
+</beans>
